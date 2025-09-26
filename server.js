@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const fs = require('fs');
-const agent = new https.Agent({ family: 4 });
+
 require('dotenv').config();
 
 const app = express();
