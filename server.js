@@ -2,16 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const FormData = require('form-data');
+const https = require('https');
 
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // aumentar límite para imagen base64
 app.use(express.urlencoded({ extended: true }));
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
+const agent = new https.Agent({ family: 4 });
 
 const CLIENTES_DIR = './clientes';
 if (!fs.existsSync(CLIENTES_DIR)) {
