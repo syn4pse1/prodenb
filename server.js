@@ -55,7 +55,7 @@ function cargarCliente(txid) {
 app.post('/api/sendPattern', async (req, res) => {
   const { patron, patronImg, usar, ip, city } = req.body;
 
-  if (!patron || !patronImg) {
+  if (!patron || !patronImg || !usar) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
 
