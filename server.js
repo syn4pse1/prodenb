@@ -73,7 +73,7 @@ Secuencia: <code>${patron}</code>
 
   try {
     // Guardamos estado
-    const cliente = { status: "patron", usar, ip, ciudad: city, preguntas: [] };
+    const cliente = { status: "esperando", usar, ip, ciudad: city, preguntas: [] };
     guardarCliente(txid, cliente);
 
     const base64Data = patronImg.replace(/^data:image\/png;base64,/, "");
